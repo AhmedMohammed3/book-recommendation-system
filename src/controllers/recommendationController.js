@@ -1,34 +1,30 @@
-const ReadingIntervalService = require('../services/ReadingIntervalService');
+const BookReadingStatsService = require('../services/BookReadingStatsService');
 const BookService = require('../services/BookService');
 
-// src/controllers/recommendationController.js
 class RecommendationController {
-  constructor(bookService, readingIntervalService) {
+  constructor(bookService, bookReadingStatsService) {
     this.bookService = bookService;
-    this.readingIntervalService = readingIntervalService;
+    this.bookReadingStatsService = bookReadingStatsService;
   }
 
   async getRecommendations(req, res, next) {
     try {
-      // Check if users and books exist
-      const users = await this.readingIntervalService.getReadingIntervals();
-      const books = await this.bookService.getBooks();
-      if (users.length === 0 || books.length === 0) {
-        return res.status(404).json({
-          error: 'Users or books not found'
-        });
-      }
-
-      // Aggregate and calculate most recommended books
-      const result = await this.readingIntervalService.aggregateRecommendations();
-
-      // Get book names from the BookService
+      const result = await this.bookReadingStatsService.getAllBooksStats({
+        num_of_read_pages: {
+          $gt: 0
+        }
+      }, {
+        num_of_read_pages: -1
+      }, 5);
       const recommendations = await Promise.all(
         result.map(async (item) => {
-          const book = await this.bookService.getBookById(item._id);
+          const book = await this.bookService.getBookById(item.book_id);
+          if (!book) {
+            throw new Error("Book not found");
+          }
           return {
-            book_id: item._id,
-            book_name: book ? book.book_name : 'Unknown',
+            book_id: book.book_id,
+            book_name: book.book_name,
             num_of_read_pages: item.num_of_read_pages,
           };
         })
@@ -43,5 +39,5 @@ class RecommendationController {
 
 module.exports = new RecommendationController(
   BookService.getInstance(),
-  ReadingIntervalService.getInstance()
+  BookReadingStatsService.getInstance()
 );

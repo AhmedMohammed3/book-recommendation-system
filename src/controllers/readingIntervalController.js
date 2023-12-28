@@ -1,13 +1,16 @@
 const ReadingIntervalService = require('../services/ReadingIntervalService');
 const UserService = require('../services/UserService');
 const BookService = require('../services/BookService');
+const BookReadingStatsService = require('../services/BookReadingStatsService');
 const SmsMiddlewareFactory = require('../services/smsProviders/SmsMiddlewareFactory');
+const BookUtils = require('../utils/BookUtils');
 
 class ReadingIntervalController {
-  constructor(userService, bookService, readingIntervalService) {
+  constructor(userService, bookService, readingIntervalService, bookUtils) {
     this.userService = userService;
     this.bookService = bookService;
     this.readingIntervalService = readingIntervalService;
+    this.bookUtils = bookUtils;
   }
 
   async submitReadingInterval(req, res, next) {
@@ -19,7 +22,6 @@ class ReadingIntervalController {
         end_page
       } = req.body;
 
-      // Check if user exists
       const user = await this.userService.getUserById(user_id);
       if (!user) {
         return res.status(404).json({
@@ -27,7 +29,6 @@ class ReadingIntervalController {
         });
       }
 
-      // Check if book exists
       const book = await this.bookService.getBookById(book_id);
       if (!book) {
         return res.status(404).json({
@@ -41,17 +42,30 @@ class ReadingIntervalController {
         });
       }
 
-      // Save reading interval to the database
-      await this.readingIntervalService.createReadingIntervals({
+      const bookReadingIntervals = await this.readingIntervalService.getReadingIntervalByBookId(book_id);
+
+      setImmediate(() => {
+        this.bookUtils.incrementBookReadingPages(book_id, start_page, end_page, bookReadingIntervals);
+      });
+
+
+      const created = await this.readingIntervalService.createReadingIntervals({
         user_id,
         book_id,
         start_page,
         end_page,
       });
 
-      // Use Factory Pattern to create SMSService instance
+      if (!created) {
+        throw new Error("Cannot add reading intervals");
+      }
+
       const smsService = SmsMiddlewareFactory.getSmsProvider();
-      smsService.sendThankYouSMS(user_id);
+      smsService.sendThankYouSMS(user_id).then(sent => {
+        console.log("SMS Sent");
+      }).catch(err => {
+        console.log("SMS Not Sent", err);
+      })
 
       res.status(201).json({
         message: 'Reading interval submitted successfully'
@@ -65,5 +79,6 @@ class ReadingIntervalController {
 module.exports = new ReadingIntervalController(
   UserService.getInstance(),
   BookService.getInstance(),
-  ReadingIntervalService.getInstance()
+  ReadingIntervalService.getInstance(),
+  BookUtils.getInstance(BookReadingStatsService.getInstance())
 );

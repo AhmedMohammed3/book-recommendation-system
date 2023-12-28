@@ -7,7 +7,6 @@ const SmsProviderInterface = require('./SmsProviderInterface');
 
 class SmsProvider2 extends SmsProviderInterface {
   async sendThankYouSMS(user_id) {
-    // Use axios to send a thank-you SMS
     await axios.post(smsProviderUrl, {
       user_id
     });

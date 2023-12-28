@@ -14,7 +14,6 @@ const {
   PORT
 } = require('./src/utils/config');
 
-// Connect to MongoDB
 mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -22,7 +21,6 @@ mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_NAME}?retr
 
 const app = express();
 
-// Swagger documentation options
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -38,7 +36,6 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Middleware
 app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());

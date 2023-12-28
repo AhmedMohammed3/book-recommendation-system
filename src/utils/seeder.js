@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const Book = require('../models/Book');
+const BookReadingStats = require('../models/BookReadingStats');
 const {
     DB_USER,
     DB_PASS,
@@ -9,6 +10,8 @@ const {
 } = require('./config');
 
 const seedDatabase = async () => {
+    await dropDatabase();
+
     await seedUsers();
     await seedBooks();
 
@@ -17,7 +20,7 @@ const seedDatabase = async () => {
 };
 
 const seedBooks = async () => {
-    await Book.deleteMany({});
+
     const books = [{
             book_id: '1',
             book_name: 'Harry Potter'
@@ -59,11 +62,19 @@ const seedBooks = async () => {
             book_name: 'Book 10'
         },
     ];
-    return await Book.create(books);
-}
+
+    const booksStatsData = books.map((book) => ({
+        book_id: book.book_id,
+        num_of_read_pages: 0
+    }));
+
+    return await Promise.all([
+        Book.create(books),
+        BookReadingStats.create(booksStatsData),
+    ]);
+};
 
 const seedUsers = async () => {
-    await User.deleteMany({});
     const users = [{
             user_id: '111',
             username: 'user1'
@@ -100,10 +111,15 @@ const seedUsers = async () => {
     return await User.create(users);
 }
 
+const dropDatabase = async () => {
+    await mongoose.connection.db.dropDatabase();
+    console.log('Database dropped successfully');
+};
+
 mongoose
     .connect(`mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`, {
         useNewUrlParser: true,
-        useUnifiedTopology: true,
+        useUnifiedTopology: true
     })
     .then(() => {
         console.log('Connected to MongoDB');
