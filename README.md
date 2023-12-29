@@ -42,7 +42,8 @@ Solving this problem, We're creating a system that does two main things:
         }
     ]
     ```
-
+#### Live Demo
+[https://book-reads.onrender.com/api-docs](https://book-reads.onrender.com/api-docs)
 ### System Requirements
 
 **Submit Reading API:**
@@ -71,6 +72,7 @@ For SMS, there are two options:
 - [Book Recommendation System](#book-recommendation-system)
   - [Description](#description)
     - [Problem Overview](#problem-overview)
+      - [Live Demo](#live-demo)
     - [System Requirements](#system-requirements)
     - [SMS Providers](#sms-providers)
   - [Table of Contents](#table-of-contents)
@@ -151,7 +153,7 @@ This command will use Mocha to run tests located in the ./test directory. Chai i
 
 The API documentation is available using Swagger UI.
 
-Visit [http://localhost:your_server_port/api-docs](http://localhost:your_server_port/api-docs) to explore the API endpoints.
+Visit [https://book-reads.onrender.com/api-docs](https://book-reads.onrender.com/api-docs) to explore the API endpoints.
 
 ## Running the Server
 
