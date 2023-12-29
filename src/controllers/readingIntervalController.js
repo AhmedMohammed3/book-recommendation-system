@@ -37,7 +37,7 @@ class ReadingIntervalController {
         });
       }
 
-      if (start_page > end_page) {
+      if (start_page > end_page || end_page == 0) {
         return res.status(404).json({
           error: 'Start Page cannot be after end page'
         });

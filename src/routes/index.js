@@ -1,65 +1,67 @@
-/**
- * @swagger
- * tags:
- *   name: Reading Intervals
- *   description: APIs for managing user reading intervals
- * 
- * /api/v1/submit-reading-interval:
- *   post:
- *     summary: Submit a user reading interval
- *     tags: [Reading Intervals]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               user_id:
- *                 type: string
- *               book_id:
- *                 type: string
- *               start_page:
- *                 type: integer
- *               end_page:
- *                 type: integer
- *     responses:
- *       '201':
- *         description: Reading interval submitted successfully
- *         content:
- *           application/json:
- *             example:
- *               message: Reading interval submitted successfully
- * 
- * /api/v1/get-recommendations:
- *   get:
- *     summary: Get the most recommended books
- *     tags: [Reading Intervals]
- *     responses:
- *       '200':
- *         description: List of recommended books
- *         content:
- *           application/json:
- *             example:
- *               - book_id: "5"
- *                 book_name: "Clean Code"
- *                 num_of_read_pages: 100
- *               - book_id: "1"
- *                 book_name: "Harry Potter"
- *                 num_of_read_pages: 90
- *               - book_id: "10"
- *                 book_name: "The Kite Runner"
- *                 num_of_read_pages: 20
- */
-
 const express = require('express');
 const router = express.Router();
 const readingIntervalController = require('../controllers/readingIntervalController');
 const recommendationController = require('../controllers/recommendationController');
-
+/**
+ * @swagger
+ * /api/v1/submit-reading-interval:
+ *   post:
+ *     summary: Submit Reading Interval
+ *     description: Submits a reading interval for a user and book.
+ *     parameters:
+ *       - in: body
+ *         name: readingInterval
+ *         description: Reading Interval object
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             user_id:
+ *               type: string
+ *               description: ID of the user submitting the reading interval
+ *             book_id:
+ *               type: string
+ *               description: ID of the book for the reading interval
+ *             start_page:
+ *               type: integer
+ *               description: Starting page number
+ *             end_page:
+ *               type: integer
+ *               description: Ending page number
+ *     responses:
+ *       201:
+ *         description: Reading interval submitted successfully
+ *       404:
+ *         description: User not found, Book not found, or Start Page cannot be after end page
+ */
 router.post('/submit-reading-interval', (req, res, next) => {
     readingIntervalController.submitReadingInterval(req, res, next)
 });
+
+/**
+ * @swagger
+ * /api/v1/get-recommendations:
+ *   get:
+ *     summary: Get Recommendations
+ *     description: Retrieves book recommendations based on reading statistics.
+ *     responses:
+ *       200:
+ *         description: Successful response with an array of book recommendations
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               book_id:
+ *                 type: string
+ *                 description: ID of the recommended book
+ *               book_name:
+ *                 type: string
+ *                 description: Name of the recommended book
+ *               num_of_read_pages:
+ *                 type: integer
+ *                 description: Number of pages read for the recommended book
+ */
 router.get('/get-recommendations', (req, res, next) => {
     recommendationController.getRecommendations(req, res, next)
 });
